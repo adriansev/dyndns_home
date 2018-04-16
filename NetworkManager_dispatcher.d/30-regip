@@ -1,0 +1,2 @@
+#!/bin/sh
+/usr/bin/curl -fslk https://<host_of_dnfmasq>/dnsmasq/reg.php?$(/usr/bin/hostname -s)
