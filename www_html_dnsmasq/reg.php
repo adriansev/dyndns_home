@@ -1,6 +1,12 @@
 <?php
 $tag = explode('?', $_SERVER['REQUEST_URI'])[1];
-$ip = $_SERVER['REMOTE_ADDR'];
+$ip_seen = $_SERVER['REMOTE_ADDR'];
+$ip_forwarded=$_SERVER['HTTP_FORWARDED'];
+
+if ( $ip_seen != $ip_forwarded )
+    { $ip = $ip_forwarded; }
+else
+    { $ip = $ip_seen; }
 
 $pat = '/^(([a-zA-Z0-9]|[a-zA-Z0-9][a-zA-Z0-9\-]*[a-zA-Z0-9])\.)*([A-Za-z0-9]|[A-Za-z0-9][A-Za-z0-9\-]*[A-Za-z0-9])$/';
 
