@@ -18,7 +18,8 @@ nameserver 127.0.0.1
 one could add other backup nameservers (in case the local dnsmasq is not running)
 
 2. Make sure dnsmasq is restarted each time content of /etc/dnsmasq.d is modified - only for systemd
-see dnsmasq_restarter.path and dnsmasq_restarter.service
+copy dnsmasq_restarter.path and dnsmasq_restarter.service in /etc/systemd/system
+systemctl enable --now dnsmasq_restarter.path dnsmasq_restarter.service
 
 3. Serve by a php enabled server the contents of www_html_dnsmasq :
 a php that writes a pair of name/ip in /etc/dnsmasq.d (the regex should validate the hostname)
