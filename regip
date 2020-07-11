@@ -1,0 +1,24 @@
+#!/usr/bin/env bash
+
+LOCK="/tmp/regip"
+[[ -e "${LOCK}" ]] && exit 0
+/usr/bin/touch "${LOCK}"
+
+while true; do
+    /usr/bin/sleep 1
+    GW="$(/usr/sbin/ip -4 r | /usr/bin/awk '/default/ {print $3}')"
+    HOST_SHORT=$(/usr/bin/hostname -s)
+    IP_PRIV_DYN=$(/usr/sbin/ip -4 -o a s | /usr/bin/awk '/dynamic/ {split($4,arr,"/");print arr[1]}') #'
+
+    # we want only private addresses (we expect that the public ones are registered in dns)
+    IP_INT_PRIV="$(/usr/bin/grep -P '/(^127\.)|(^192\.168\.)|(^10\.)|(^172\.1[6-9]\.)|(^172\.2[0-9]\.)|(^172\.3[0-1]\.)/' <<< "${IP_PRIV_DYN}")" #'
+
+    # IF there are multiple dhcp private ips on the interface lets select one
+    IP_PRIV="$(/usr/bin/head -n1 <<< "${IP_INT_PRIV}")"
+    if /usr/bin/ping -n -c 2 "${GW}" &> /dev/null; then
+        /usr/bin/curl -fslk --header "Forwarded: ${IP_PRIV}" https://sev.spacescience.ro/dnsmasq/reg.php?${HOST_SHORT}
+        break
+    fi
+done
+
+/usr/bin/rm -rf "${LOCK}"

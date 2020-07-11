@@ -1,0 +1,4 @@
+mkdir -p /root/bin
+cp regip /root/bin/
+echo "@reboot root /root/bin/regip
+*/10 * * * * root /root/bin/regip" > /etc/cron.d/regip
