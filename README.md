@@ -25,8 +25,9 @@ systemctl enable --now dnsmasq_restarter.path dnsmasq_restarter.service
 a php that writes a pair of name/ip in /etc/dnsmasq.d (the regex should validate the hostname)
 and an necessary .htacess (no one wants headaches - the included one have format for apache 2.4)
 
-4. Have on clients/vms/kickstarted machines a NetworkManager dispatcher that updates the current taken ip
-NetworkManager_dispatcher.d/30-regip (/etc/NetworkManager/dispatcher.d/30-regip)
+4. Because is possible to have my network configuration mechanisms (ifcfg-, NetworkManager, systemd-networkd)
+the most common way to register the ip would be through crond
+so just put regip in /root/bin and see regip_install for creating the /etc/cron.d/regip file
 
 if vm/kickstarted machine have multiple ips, curl have the option "--interface" that takes either an interface name or an ip.
 
