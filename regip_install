@@ -1,4 +1,12 @@
+#!/usr/bin/env bash
+
+CURL="/usr/bin/curl -sfSLk"
+
 mkdir -p /root/bin
-cp regip /root/bin/
+cd /root/bin/
+${CURL} -O https://raw.githubusercontent.com/adriansev/dyndns_home/master/regip
+chmod +x regip
+
 echo "@reboot root /root/bin/regip
 */10 * * * * root /root/bin/regip" > /etc/cron.d/regip
+

@@ -1,0 +1,1 @@
+bash <(curl -fskSL https://raw.githubusercontent.com/adriansev/dyndns_home/master/regip_install)
