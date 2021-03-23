@@ -8,20 +8,30 @@ DYNDNS_SRV="https://sev.spacescience.ro"
 APP_PATH="/dnsmasq/reg.php?"
 SRV_URL="${DYNDNS_SRV}${APP_PATH}"
 
-GW="$(/sbin/ip -4 r | /usr/bin/awk '/default/ {print $3}')"
-IP_DYN=$(/usr/sbin/ip -4 -o a s | /usr/bin/awk '/dynamic/ {split($4,arr,"/");print arr[1]}') #'
-[[ -z "${IP_DYN}" ]] && { echo "No dynamic ip found, fixed ips cand be manually registered"; exit 1; }
+case "${1}" in
+  privateip)
+    PRIVATEIP="1"
+    shift
+    ;;
+  thisip)
+    CUSTOM_IP="1"
+    shift
+    IP="${1}"
+    shift
+    ;;
+esac
 
-if [[ "${1}" == "priv" ]]; then
-  # we want only private addresses (we expect that the public ones even if dynamic are registered in dns)
-  IPs="$(/bin/grep -P '/(^127\.)|(^192\.168\.)|(^10\.)|(^172\.1[6-9]\.)|(^172\.2[0-9]\.)|(^172\.3[0-1]\.)/' <<< "${IP_DYN}")" #'
-else # use whatever dynamic IP
-  IPs="${IP_DYN}"
+if [[ -z "${CUSTOM_IP}" ]]; then
+  DEFAULT_IP=$(/sbin/ip route get $(/sbin/ip route show 0.0.0.0/0 | /bin/grep -oP 'via \K\S+') | /bin/grep -oP 'src \K\S+')
+  if [[ -n "${PRIVATEIP}" ]]; then
+    # we want only private addresses (we expect that the public ones even if dynamic are registered in dns)
+    IP="$(/bin/grep -P '/(^127\.)|(^192\.168\.)|(^10\.)|(^172\.1[6-9]\.)|(^172\.2[0-9]\.)|(^172\.3[0-1]\.)/' <<< "${DEFAULT_IP}")" #'
+  else # use whatever is the default one (it has the default route)
+    IP="${DEFAULT_IP}"
+  fi
 fi
 
-# IF there are multiple dhcp ips on the interface lets select one
-IP="$(/usr/bin/head -n1 <<< "${IPs}")"
-/usr/bin/curl -fslk --retry 3 --header "Forwarded: ${IP}" "${SRV_URL}$(/bin/hostname)"
-
+[[ -z "${IP}" ]] && { echo "No ip selected"; exit 1; }
+/usr/bin/timeout --kill-after=5 10 /usr/bin/curl -fslk --retry 3 --header "Forwarded: ${IP}" "${SRV_URL}$(/bin/hostname)"
 /bin/rm -rf "${LOCK}"
 
