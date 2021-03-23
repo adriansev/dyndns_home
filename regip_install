@@ -1,15 +1,10 @@
 #!/usr/bin/env bash
 
-CURL="/usr/bin/curl -sfSLk"
+mkdir -p /root/bin && cd /root/bin || { echo "cannot cd to /root/bin"; exit 1; }
+/usr/bin/curl -sfSLk https://raw.githubusercontent.com/adriansev/dyndns_home/master/regip -o /root/bin/regip && chmod +x regip
 
-REGIP_ARG="${1}"
-
-mkdir -p /root/bin
-cd /root/bin/
-${CURL} -O https://raw.githubusercontent.com/adriansev/dyndns_home/master/regip
-chmod +x regip
-
-echo "@reboot root /root/bin/regip ${REGIP_ARG} &>/dev/null
-*/10 * * * * root /root/bin/regip ${REGIP_ARG} &>/dev/null
+echo "
+@reboot      root /root/bin/regip ${@} &>/dev/null
+*/10 * * * * root /root/bin/regip ${@} &>/dev/null
 " > /etc/cron.d/regip
 
